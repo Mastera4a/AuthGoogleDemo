@@ -15,18 +15,32 @@ namespace AuthGoogleDemo
 
         private async void LoginBtn_Clicked(object sender, EventArgs e)
         {
-            var loggedUser = await _googleAuthService.GetCurrentUserAsync();
-
-            if (loggedUser == null)
+            try
             {
-                loggedUser = await _googleAuthService.AuthenticateAsync();
+                var loggedUser = await _googleAuthService.GetCurrentUserAsync();
+                Console.WriteLine($"[DEBUG] GetCurrentUserAsync: {loggedUser?.FullName}");
+
+                if (loggedUser == null)
+                {
+                    loggedUser = await _googleAuthService.AuthenticateAsync();
+                    Console.WriteLine($"[DEBUG] AuthenticateAsync: {loggedUser?.FullName}");
+                }
+
+                if (loggedUser == null)
+                {
+                    Console.WriteLine("[ERROR] loggedUser всё ещё null");
+                    return;
+                }
+
+                await DisplayAlert("Login Message", "Welcome " + loggedUser.FullName, "Ok");
             }
-
-            // Проверяем null и приводим к строке
-            string userName = loggedUser.FullName?.ToString() ?? "User";
-
-            await Application.Current.MainPage.DisplayAlert("Login Message", "Welcome " + userName, "Ok");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] {ex.Message}");
+                await DisplayAlert("Error", ex.Message, "Ok");
+            }
         }
+
 
 
         private async void logoutBtn_Clicked(object sender, EventArgs e)
